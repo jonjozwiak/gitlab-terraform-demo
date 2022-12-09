@@ -84,19 +84,19 @@ resource "gitlab_branch" "java_hello_branch" {
   ref     = "main"
 }
 
-# Add repository files in for_each loop
-resource "gitlab_repository_file" "java_hello_files" {
-  for_each = fileset(path.module, "files/**")
- 
-  project        = gitlab_project.java_hello.id
-  branch         = gitlab_branch.java_hello_branch.name
-  file_path      = trimprefix(each.key, "files/")
-  content        = each.value
-
-  author_email   = "gitlab@example.com"
-  author_name    = "Gitlab"
-  commit_message = "feature: java hello world mvp"
-}
+## Add repository files in for_each loop
+#resource "gitlab_repository_file" "java_hello_files" {
+#  for_each = fileset(path.module, "files/**")
+# 
+#  project        = gitlab_project.java_hello.id
+#  branch         = gitlab_branch.java_hello_branch.name
+#  file_path      = trimprefix(each.key, "files/")
+#  content        = each.value ## This is wrong
+#
+#  author_email   = "gitlab@example.com"
+#  author_name    = "Gitlab"
+#  commit_message = "feature: java hello world mvp"
+#}
 
 # Add a project 
 resource "gitlab_project" "python_hello" {
@@ -114,4 +114,16 @@ resource "gitlab_project" "python_hello" {
   wiki_enabled               = true
   wiki_access_level          = "enabled"
 
+}
+
+resource "null_resource" "populate_repo" {
+  depends_on = [
+    gitlab_project.java_hello,
+    gitlab_branch.java_hello_branch
+  ]
+  provisioner "local-exec" {
+    command = "export GITLAB_TOKEN=\"${var.gitlab_token}\" && bash ${path.module}/scripts/java_hello_automation.sh"
+    interpreter = ["/bin/bash", "-c"]
+    working_dir = path.module
+  }
 }
