@@ -1,9 +1,10 @@
 variable "gitlab_token" {
-    type = string
+    type        = string
     description = "Gitlab token"
+    sensitive   = true
 }
 
 variable "gitlab_url" {
-    type = string
+    type        = string
     description = "Gitlab url"
 }
